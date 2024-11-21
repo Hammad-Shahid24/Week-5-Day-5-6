@@ -1,4 +1,4 @@
-import { FC, useEffect, useState } from "react";
+import { FC, useCallback, useEffect, useMemo, useState } from "react";
 import axios from "axios";
 import Lottie from "lottie-react";
 import loadingAnimation from "../assets/LoadingAnimation.json";
@@ -31,8 +31,6 @@ const ProductCataloguePage: FC = () => {
   >([0, 1000]);
   const [selectedRating, setSelectedRating] = useState<number[]>([]);
 
-  const productsPerPage = 8;
-
   useEffect(() => {
     const fetchProducts = async () => {
       setLoading(true);
@@ -59,43 +57,70 @@ const ProductCataloguePage: FC = () => {
     fetchProducts();
   }, []);
 
-  const handleNextPage = () => {
-    if (page < totalPages) {
-      setPage(page + 1);
-    }
-  };
-
-  const handlePreviousPage = () => {
-    if (page > 1) {
-      setPage(page - 1);
-    }
-  };
-
   // Multi-criteria Filter Logic
-  const filteredProducts = products.filter((product) => {
-    const matchesSearchQuery = product.title
-      .toLowerCase()
-      .includes(searchQuery.toLowerCase());
-    const matchesCategory =
-      selectedCategory === "All" || product.category === selectedCategory;
-    const matchesPrice =
-      product.price >= selectedPriceRange[0] &&
-      product.price <= selectedPriceRange[1];
-    const matchesRating =
-      selectedRating.length === 0 ||
-      selectedRating.includes(Math.floor(product.rating.rate));
+  const filteredProducts = useMemo(() => {
+    return products.filter((product) => {
+      const matchesSearchQuery = product.title
+        .toLowerCase()
+        .includes(searchQuery.toLowerCase());
+      const matchesCategory =
+        selectedCategory === "All" || product.category === selectedCategory;
+      const matchesPrice =
+        product.price >= selectedPriceRange[0] &&
+        product.price <= selectedPriceRange[1];
+      const matchesRating =
+        selectedRating.length === 0 ||
+        selectedRating.includes(Math.floor(product.rating.rate));
 
-    return (
-      matchesSearchQuery && matchesCategory && matchesPrice && matchesRating
-    );
-  });
+      return (
+        matchesSearchQuery && matchesCategory && matchesPrice && matchesRating
+      );
+    });
+  }, [
+    products,
+    searchQuery,
+    selectedCategory,
+    selectedPriceRange,
+    selectedRating,
+  ]);
 
+  const productsPerPage = 8;
   const totalPages = Math.ceil(filteredProducts.length / productsPerPage);
   const startIndex = (page - 1) * productsPerPage;
   const displayedProducts = filteredProducts.slice(
     startIndex,
     startIndex + productsPerPage
   );
+
+  const handleNextPage = useCallback(() => {
+    if (page < totalPages) {
+      setPage(page + 1);
+    }
+  }, [page, totalPages]);
+
+  const handlePreviousPage = useCallback(() => {
+    if (page > 1) {
+      setPage(page - 1);
+    }
+  }, [page]);
+
+  const previewProduct = useCallback((product: Product) => {
+    Swal.fire({
+      title: product.title,
+      html: `
+        <div class="flex flex-col sm:flex-row justify-center items-center">
+          <img src="${product.image}" class="w-full sm:w-64 h-64 object-contain mx-auto" />
+          <div class="flex flex-col justify-center mt-4 sm:mt-0 sm:ml-4">
+            <p class="text-left mt-2 sm:mt-4">Category: ${product.category}</p>
+            <p class="text-left mt-2 h-24 overflow-y-auto">Description: ${product.description}</p>          
+            <p class="text-left mt-2">Price: $${product.price}</p>
+            <p class="text-left mt-2">Rating: ${product.rating.rate}★</p>
+          </div>
+        </div>
+        `,
+      showConfirmButton: false,
+    });
+  }, []);
 
   const openFilterModal = () => {
     Swal.fire({
@@ -183,29 +208,6 @@ const ProductCataloguePage: FC = () => {
           }
         };
       },
-    });
-  };
-
-  const previewProduct = (product: Product) => {
-    Swal.fire({
-      title: product.title,
-      html: `
-      <div class="flex flex-col sm:flex-row justify-center items-center">
-        <img src="${product.image}" class="w-full sm:w-64 h-64 object-contain mx-auto" />
-        <div class="flex flex-col justify-center mt-4 sm:mt-0 sm:ml-4">
-          <p class="text-left mt-2 sm:mt-4">Category: ${product.category}</p>
-          <p class="text-left mt-2 h-24 overflow-y-auto">Description: ${product.description}</p>          <p class="text-left mt-2">Price: $${product.price}</p>
-          <p class="text-left mt-2">Rating: ${product.rating.rate}★</p>
-        </div>
-      </div>
-      `,
-      customClass: {
-        popup: "swal2-popup-custom",
-        title: "swal2-title-custom",
-        confirmButton: "swal2-confirm-custom",
-        cancelButton: "swal2-cancel-custom",
-      },
-      showConfirmButton: false,
     });
   };
 
