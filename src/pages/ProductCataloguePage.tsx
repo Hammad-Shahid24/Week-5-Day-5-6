@@ -106,9 +106,9 @@ const ProductCataloguePage: FC = () => {
 
   const previewProduct = useCallback((product: Product) => {
     Swal.fire({
-      title: product.title,
       html: `
-        <div class="flex flex-col sm:flex-row justify-center items-center">
+      <h2 class="text-center text-2xl font-bold font-courierPrime mb-8">${product.title}</h2>
+        <div class="flex flex-col sm:flex-row justify-center font-courierPrime items-center">
           <img src="${product.image}" class="w-full sm:w-64 h-64 object-contain mx-auto" />
           <div class="flex flex-col justify-center mt-4 sm:mt-0 sm:ml-4">
             <p class="text-left mt-2 sm:mt-4">Category: ${product.category}</p>
@@ -124,9 +124,10 @@ const ProductCataloguePage: FC = () => {
 
   const openFilterModal = () => {
     Swal.fire({
-      title: "Apply Filters",
       html: `
-        <div class="space-y-4 text-left ">
+            <h2 class="text-center text-2xl font-bold font-courierPrime mb-8">Apply Filters</h2>
+
+        <div class="space-y-4 text-left font-courierPrime">
           <!-- Category Filter -->
           <div>
             <label for="category" class="block text-sm font-medium text-gray-700">Select Category</label>
@@ -140,24 +141,24 @@ const ProductCataloguePage: FC = () => {
           </div>
           
           <!-- Price Range Filter -->
-          <div class="flex flex-col items-center sm:flex-row justify-between sm:items-center" >
+          <div class="flex flex-col items-center sm:flex-row sm:justify-between sm:items-center" >
             <label for="priceRange" class="block text-sm font-medium text-gray-700">Price Range ($)</label>
             <input type="range" id="priceRange" min="0" max="1000" value="${
               selectedPriceRange[1]
-            }" class="swal2-input mt-1 block w-40 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" />
+            }" class="swal2-input mt-1    focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" />
             <span id="priceValue" class="block mt-1  text-center min-w-16 text-sm text-gray-500">$${
               selectedPriceRange[1]
             }</span>
           </div>
           
           <!-- Rating Filter -->
-          <div class="flex flex-col space-y-2">
+          <div class="flex flex-col sm:flex-row space-y-2 sm:space-x-8 bg-blue-200 items-center">
             <label for="rating" class="block text-sm font-medium text-gray-700">Select Rating</label>
-            <div id="rating" class="flex w-fit mx-auto space-x-2 mt-1">
+            <div id="rating" class="flex items-center w-fit mx-auto space-x-2 ">
               ${[1, 2, 3, 4, 5]
                 .map(
                   (rating) => `
-                <label class="flex items-center space-x-1">
+                <label class="flex items-center space-x-1 bg-blue-400">
                   <input type="checkbox" class="rating-checkbox" value="${rating}" ${
                     selectedRating.includes(rating) ? "checked" : ""
                   } class="h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500" />
